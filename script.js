@@ -1,4 +1,4 @@
-// --- START OF script.js (Review Translated Text - Complete) ---
+// --- START OF script.js (Review Pref - Complete) ---
 document.addEventListener('DOMContentLoaded', () => {
     // --- Get DOM Elements ---
     const uploadButton = document.getElementById('uploadButton');
@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const youtubeUrlInput = document.getElementById('youtubeUrl');
     const processUrlButton = document.getElementById('processUrlButton');
     const voiceOptionsContainer = document.getElementById('voiceOptionsContainer');
-    const inputSection = document.getElementById('inputSection'); // Container for initial inputs
+    const reviewOptionsContainer = document.getElementById('reviewOptionsContainer'); // New container
+    const inputSection = document.getElementById('inputSection');
 
     const mainFeedbackArea = document.getElementById('mainFeedbackArea');
     const progressIndicator = document.getElementById('progressIndicator');
@@ -19,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitEditsButton = document.getElementById('submitEditsButton');
     const currentJobIdInput = document.getElementById('currentJobId'); // Hidden input
 
-    let isProcessingStage1 = false;
-    let isProcessingFinalStage = false;
+    let isProcessingStage1 = false; // Flag for initial processing (stage 1 or direct)
+    let isProcessingFinalStage = false; // Flag specifically for final stage after review
 
     // --- Event Listeners ---
 
@@ -34,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. File Input Change -> Start Stage 1
+    // 2. File Input Change -> Start Processing
     if (videoFileInput) {
         videoFileInput.addEventListener('change', (event) => {
             if (isProcessingStage1 || isProcessingFinalStage) return;
@@ -44,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (selectedFile.type.startsWith('video/') || allowedFileExtension(selectedFile.name)) {
                     fileFeedback.textContent = `Selected: ${selectedFile.name}`;
                     fileFeedback.style.color = '#28a745';
-                    const formData = createStage1FormData(selectedFile);
-                    handleStage1Start('/process-stage1', formData, selectedFile.name);
+                    const formData = createInitialFormData(selectedFile); // Use new function
+                    handleInitialProcessingStart('/process-stage1', formData, selectedFile.name); // Call unified handler
                 } else {
                     fileFeedback.textContent = 'Please select a valid video file (mp4, mov, avi, mkv, etc.).';
                     fileFeedback.style.color = '#dc3545';
@@ -58,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Process URL Button Click -> Start Stage 1
+    // 3. Process URL Button Click -> Start Processing
     if (processUrlButton && youtubeUrlInput) {
         processUrlButton.addEventListener('click', () => {
             if (isProcessingStage1 || isProcessingFinalStage) {
@@ -69,18 +70,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!url.includes('youtube.com/') && !url.includes('youtu.be/')) {
                  setFeedback('Please enter a valid YouTube URL.', 'error'); return;
             }
-            const formData = createStage1FormData(null, url); // Pass URL
-            handleStage1Start('/process-stage1', formData, url);
+            const formData = createInitialFormData(null, url); // Use new function
+            handleInitialProcessingStart('/process-stage1', formData, url); // Call unified handler
         });
     }
 
-    // 4. Submit Edits Button Click -> Start Final Stage
+    // 4. Submit Edits Button Click -> Start Final Stage (Only relevant in Review mode)
     if (submitEditsButton) {
          submitEditsButton.addEventListener('click', () => {
               if (isProcessingStage1 || isProcessingFinalStage) {
                    setFeedback('Processing already in progress. Please wait.', 'info'); return;
               }
-              handleReviewSubmission(); // Calls the function to start final stage
+              handleReviewSubmission(); // This remains for review mode submission
          });
     }
 
@@ -93,26 +94,35 @@ document.addEventListener('DOMContentLoaded', () => {
         return allowed.includes(ext);
     }
 
-    function createStage1FormData(file, url = null) {
+    // NEW function to create form data including review preference
+    function createInitialFormData(file, url = null) {
         const formData = new FormData();
         if (file) {
             formData.append('videoFile', file);
         } else if (url) {
             formData.append('youtube_url', url);
         }
-        const selectedVoice = document.querySelector('input[name="ttsVoice"]:checked').value || 'female';
+        // Get voice preference
+        const selectedVoice = voiceOptionsContainer.querySelector('input[name="ttsVoice"]:checked').value || 'female';
         formData.append('tts_voice', selectedVoice);
+        // Get review preference
+        const reviewPreference = reviewOptionsContainer.querySelector('input[name="reviewPreference"]:checked').value || 'direct';
+        formData.append('reviewPreference', reviewPreference);
+
+        console.log("Sending Review Preference:", reviewPreference); // Debug
         return formData;
     }
 
-    // --- Handle Start of Stage 1 Processing ---
-    function handleStage1Start(endpoint, payload, inputName) {
+    // --- Handle Start of EITHER Direct OR Stage 1 Processing ---
+    function handleInitialProcessingStart(endpoint, payload, inputName) {
         if (isProcessingStage1 || isProcessingFinalStage) return;
-        isProcessingStage1 = true;
+        isProcessingStage1 = true; // Use this flag for the initial request
         disableUIBeforeProcessing();
-        setFeedback(`Starting Stage 1 (Segmentation, Transcription & Translation) for: ${inputName}`, 'info');
-        progressStep.textContent = 'Extracting & Processing... This may take a while.';
-        progressIndicator.style.display = 'flex'; // Show progress indicator
+        const reviewPref = payload.get('reviewPreference') || 'direct'; // Get pref from form data
+        const processingModeText = reviewPref === 'review' ? "Stage 1 (Segmentation, Transcription & Translation)" : "Direct Processing";
+        setFeedback(`Starting ${processingModeText} for: ${inputName}`, 'info');
+        progressStep.textContent = 'Processing Video... This may take a while.';
+        progressIndicator.style.display = 'flex';
         hideReviewUI();
 
         fetch(endpoint, { method: 'POST', body: payload })
@@ -126,93 +136,72 @@ document.addEventListener('DOMContentLoaded', () => {
                 return response.json();
             })
             .then(data => {
-                console.log("Stage 1 Success Data:", data);
-                setFeedback(data.message || 'Translation complete. Please review.', 'success');
-                if (data.review_data) {
-                     displayReviewUI(data.review_data); // Proceed to display review UI
+                console.log("Initial Processing Response:", data);
+                // --- Check the mode returned by the backend ---
+                if (data.mode === 'review' && data.review_data) {
+                    setFeedback(data.message || 'Translation complete. Please review.', 'success');
+                    displayReviewUI(data.review_data); // Show review UI
+                } else if (data.mode === 'direct' && data.final_video_filename) {
+                    setFeedback(data.message || 'Direct processing complete!', 'success');
+                    addDownloadLink(`/final_video/${data.final_video_filename}`, data.final_video_filename); // Add download link
+                    enableUI(); // Re-enable UI for new job
+                    resetInputs(); // Clear inputs
                 } else {
-                     throw new Error("Missing review data from server.");
+                    // Unexpected response structure
+                    throw new Error(data.message || "Unexpected response from server after initial processing.");
                 }
             })
             .catch(error => {
-                console.error('Stage 1 Fetch Error:', error);
-                setFeedback(`Stage 1 Failed: ${error.message}`, 'error');
+                console.error('Initial Processing Fetch Error:', error);
+                setFeedback(`Processing Failed: ${error.message}`, 'error');
                 enableUI(); // Re-enable UI fully on failure
+                resetInputs();
             })
             .finally(() => {
-                isProcessingStage1 = false;
-                progressIndicator.style.display = 'none'; // Hide progress indicator
+                isProcessingStage1 = false; // Clear initial processing flag
+                progressIndicator.style.display = 'none';
                 progressStep.textContent = '';
             });
     }
 
-    // --- Display the Review UI (for Translated Text) ---
+    // --- Display the Review UI (Remains the same, called only if mode is 'review') ---
     function displayReviewUI(reviewData) {
         currentJobIdInput.value = reviewData.job_id;
         reviewContent.innerHTML = ''; // Clear previous
 
         if (!reviewData.chunks || reviewData.chunks.length === 0) {
-             reviewContent.innerHTML = '<p>No speech segments found or Stage 1 processing failed before chunking.</p>';
+             reviewContent.innerHTML = '<p>No speech segments found or Stage 1 processing failed.</p>';
              reviewSection.style.display = 'block';
              submitEditsButton.style.display = 'none';
-             enableUI(); // Enable main buttons as there's nothing to review
-             inputSection.style.display = 'block'; // Show initial inputs again
+             enableUI(); // Enable main buttons as nothing to review
+             inputSection.style.display = 'block';
              return;
         }
 
-        // Build the review form elements
         reviewData.chunks.forEach(chunk => {
             const chunkDiv = document.createElement('div');
             chunkDiv.className = 'review-chunk';
-
-            // Display Original Transcription (read-only)
-            const originalDiv = document.createElement('div');
-            originalDiv.className = 'transcription-original';
-            originalDiv.innerHTML = `
-                <strong>Original Transcription:</strong>
-                <p>${chunk.transcribed_text || '(Transcription failed or empty)'}</p>
-                <small>Status: ${chunk.transcription_status || 'N/A'}</small>
+            chunkDiv.innerHTML = `
+                <h4>Chunk ${chunk.index + 1} (${(chunk.start_ms / 1000).toFixed(2)}s - ${(chunk.end_ms / 1000).toFixed(2)}s)</h4>
+                <div class="transcription-original">
+                    <strong>Original Transcription:</strong>
+                    <p>${chunk.transcribed_text || '(Transcription failed or empty)'}</p>
+                    <small>Status: ${chunk.transcription_status || 'N/A'}</small>
+                </div>
+                <hr>
+                <label for="editedTranslatedText_${chunk.index}"><strong>Translated Text (Edit Below):</strong></label>
+                 <small>Status: ${chunk.translation_status || 'N/A'}</small>
+                <textarea id="editedTranslatedText_${chunk.index}" data-chunk-index="${chunk.index}" rows="4">${chunk.translated_text || ''}</textarea>
+                <a href="/serve-chunk/${reviewData.job_id}/${chunk.original_audio_chunk}" target="_blank" download="${chunk.original_audio_chunk}">Listen to Original Chunk ${chunk.index + 1}</a>
             `;
-
-            // Editable Translated Text Area
-            const translatedLabel = document.createElement('label');
-            translatedLabel.htmlFor = `editedTranslatedText_${chunk.index}`;
-            translatedLabel.innerHTML = `<strong>Translated Text (Edit Below):</strong>`;
-
-            const translatedStatus = document.createElement('small');
-            translatedStatus.textContent = `Status: ${chunk.translation_status || 'N/A'}`;
-
-            const translatedTextarea = document.createElement('textarea');
-            translatedTextarea.id = `editedTranslatedText_${chunk.index}`;
-            translatedTextarea.dataset.chunkIndex = chunk.index; // Store index
-            translatedTextarea.rows = 4;
-            translatedTextarea.value = chunk.translated_text || ''; // Pre-fill
-
-            // Download Link for Original Audio Chunk
-            const downloadLink = document.createElement('a');
-            downloadLink.href = `/serve-chunk/${reviewData.job_id}/${chunk.original_audio_chunk}`;
-            downloadLink.target = '_blank';
-            downloadLink.download = chunk.original_audio_chunk;
-            downloadLink.textContent = `Listen to Original Chunk ${chunk.index + 1}`;
-            downloadLink.title = `Download ${chunk.original_audio_chunk}`;
-
-            const separator = document.createElement('hr');
-
-            // Append elements
-            chunkDiv.appendChild(originalDiv);
-            chunkDiv.appendChild(separator);
-            chunkDiv.appendChild(translatedLabel);
-            chunkDiv.appendChild(translatedStatus);
-            chunkDiv.appendChild(translatedTextarea);
-            chunkDiv.appendChild(downloadLink);
             reviewContent.appendChild(chunkDiv);
         });
 
-        inputSection.style.display = 'none'; // Hide the initial upload/url section
-        reviewSection.style.display = 'block'; // Show the review section
-        submitEditsButton.style.display = 'block'; // Show the submit button
-        progressIndicator.style.display = 'none'; // Ensure progress is hidden
-        if(submitEditsButton) submitEditsButton.disabled = false; // Ensure submit is enabled
+        inputSection.style.display = 'none'; // Hide initial inputs
+        reviewSection.style.display = 'block'; // Show review section
+        submitEditsButton.style.display = 'block'; // Show submit button
+        progressIndicator.style.display = 'none';
+        if(submitEditsButton) submitEditsButton.disabled = false; // Enable submit
     }
 
      // --- Hide the Review UI ---
@@ -222,31 +211,28 @@ document.addEventListener('DOMContentLoaded', () => {
           currentJobIdInput.value = '';
      }
 
-    // --- Handle Submission of Edited TRANSLATED Text (Final Stage) ---
+    // --- Handle Submission of Edited TRANSLATED Text (Final Stage - Only for Review Mode) ---
     function handleReviewSubmission() {
         if (isProcessingStage1 || isProcessingFinalStage) return;
         isProcessingFinalStage = true; // Use flag for final stage
         disableUIBeforeProcessing();
         setFeedback('Starting Final Stage (TTS & Merging)...', 'info');
         progressStep.textContent = 'Generating Final Video... This may take a while.';
-        progressIndicator.style.display = 'flex'; // Show progress
+        progressIndicator.style.display = 'flex';
 
         const jobId = currentJobIdInput.value;
-        const editedTranslatedTexts = {}; // Object to hold { "index": "edited text", ... }
+        const editedTranslatedTexts = {};
         const textAreas = reviewContent.querySelectorAll('textarea[data-chunk-index]');
-        textAreas.forEach(ta => {
-             editedTranslatedTexts[ta.dataset.chunkIndex] = ta.value; // Use index as key
-        });
+        textAreas.forEach(ta => { editedTranslatedTexts[ta.dataset.chunkIndex] = ta.value; });
 
-        const selectedVoice = document.querySelector('input[name="ttsVoice"]:checked').value || 'female';
+        const selectedVoice = voiceOptionsContainer.querySelector('input[name="ttsVoice"]:checked').value || 'female';
 
-        // Call the RENAMED final stage endpoint
-        fetch('/process-final-stage', {
+        fetch('/process-final-stage', { // Endpoint for review mode's final stage
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                  job_id: jobId,
-                 edited_translated_texts: editedTranslatedTexts, // Send edited translated texts
+                 edited_translated_texts: editedTranslatedTexts,
                  tts_voice: selectedVoice
             })
         })
@@ -266,28 +252,26 @@ document.addEventListener('DOMContentLoaded', () => {
              }
              hideReviewUI();
              inputSection.style.display = 'block'; // Show initial inputs again
-             enableUI(); // Re-enable everything for a new job
+             enableUI();
+             resetInputs(); // Clear inputs after success
         })
         .catch(error => {
              console.error('Final Stage Fetch Error:', error);
              setFeedback(`Final Stage Failed: ${error.message}`, 'error');
-             // Keep review UI open on failure, but enable submit button
-             inputSection.style.display = 'none'; // Keep initial hidden
+             // Keep review UI open, enable submit button for retry
+             inputSection.style.display = 'none';
              reviewSection.style.display = 'block';
              if(submitEditsButton) submitEditsButton.disabled = false;
-             // Keep other buttons disabled? Or enable all? Let's enable all for simplicity.
-             enableMainInputButtons();
+             enableMainInputButtons(); // Also enable voice options etc.
         })
         .finally(() => {
-             isProcessingFinalStage = false; // Use renamed flag
+             isProcessingFinalStage = false;
              progressIndicator.style.display = 'none';
              progressStep.textContent = '';
-             // Reset inputs after completion/failure
-             if(videoFileInput) videoFileInput.value = '';
-             if(fileFeedback) fileFeedback.textContent = 'No file selected.';
-             if(youtubeUrlInput) youtubeUrlInput.value = '';
+             // Don't reset inputs here, only on success maybe
         });
     }
+
 
     function setFeedback(message, type = 'info') {
         console.log(`Feedback (${type}): ${message}`);
@@ -302,21 +286,24 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`Adding download link for: ${filename} at ${fileUrlPath}`);
             const link = document.createElement('a');
             link.href = fileUrlPath;
-            link.textContent = `Download/View ${filename}`; // Updated text
+            link.textContent = `Download/View ${filename}`;
             link.target = '_blank';
             link.style.display = 'block';
             link.style.marginTop = '10px';
             mainFeedbackArea.appendChild(link);
         } catch (e) {
             console.error("Error adding download link:", e);
-            mainFeedbackArea.innerHTML += `<p style="color: red;">Error adding download link for ${filename}.</p>`;
+            mainFeedbackArea.innerHTML += `<p style="color: red;">Error adding download link.</p>`;
         }
      }
 
     function disableUIBeforeProcessing() {
         disableMainInputButtons();
         if(submitEditsButton) submitEditsButton.disabled = true;
-        progressIndicator.style.display = 'flex'; // Show progress
+        // Disable review preference radio buttons too
+        const reviewRadios = reviewOptionsContainer.querySelectorAll('input[type="radio"]');
+        reviewRadios.forEach(radio => radio.disabled = true);
+        progressIndicator.style.display = 'flex';
     }
 
     function disableMainInputButtons() {
@@ -330,8 +317,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function enableUI() {
         enableMainInputButtons();
-        // Submit button is handled separately based on review state
+        // Submit button enabled only if review section is visible
         if(submitEditsButton) submitEditsButton.disabled = (reviewSection.style.display === 'none');
+        // Enable review preference radio buttons
+        const reviewRadios = reviewOptionsContainer.querySelectorAll('input[type="radio"]');
+        reviewRadios.forEach(radio => radio.disabled = false);
     }
 
     function enableMainInputButtons() {
@@ -341,6 +331,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if(youtubeUrlInput) youtubeUrlInput.disabled = false;
          const voiceRadios = voiceOptionsContainer.querySelectorAll('input[type="radio"]');
          voiceRadios.forEach(radio => radio.disabled = false);
+    }
+
+    function resetInputs() {
+         if(videoFileInput) videoFileInput.value = '';
+         if(fileFeedback) fileFeedback.textContent = 'No file selected.';
+         if(youtubeUrlInput) youtubeUrlInput.value = '';
+         // Optionally reset radio buttons to default?
+         // document.getElementById('voiceFemale').checked = true;
+         // document.getElementById('prefDirect').checked = true; // Reset review pref
     }
 
 });
