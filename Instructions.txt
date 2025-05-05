@@ -1,0 +1,10 @@
+How to run:
+waitress-serve --host=0.0.0.0 --port=5000 app:app
+
+Sample input:
+https://www.youtube.com/watch?v=Og8mRiIATJw
+
+Pre-requisites:
+pip install Flask pytubefix moviepy SpeechRecognition deep_translator edge-tts pydub waitress
+
+pip install --upgrade yt-dlp
