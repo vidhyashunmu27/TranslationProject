@@ -1,2 +1,2 @@
 # TranslationProject
-Translates video of short duration from English Audio to Tamil Audio
+Translates video of short duration from English Audio to Tamil Audio for educational purposes
