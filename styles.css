@@ -1,0 +1,391 @@
+/* Basic body styling */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align top */
+    min-height: 100vh;
+    background-color: #f4f7f9; /* Slightly softer background */
+    margin: 0;
+    padding: 40px 15px; /* Add horizontal padding */
+    box-sizing: border-box;
+}
+
+/* Container styling */
+.upload-container {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer shadow */
+    text-align: center;
+    width: 100%; /* Responsive width */
+    max-width: 750px; /* Increased max width */
+    box-sizing: border-box;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 30px; /* More space */
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+h2 {
+    color: #444; /* Darker grey */
+    font-size: 1.2em; /* Slightly larger */
+    font-weight: 600;
+    margin-bottom: 15px; /* More space */
+    margin-top: 25px; /* More space */
+    text-align: left; /* Align section titles left */
+    border-bottom: 1px solid #eee; /* Separator line */
+    padding-bottom: 8px;
+}
+
+.input-section {
+    margin-bottom: 25px; /* More space */
+    padding: 20px; /* More padding */
+    border: 1px solid #e8e8e8; /* Lighter border */
+    border-radius: 6px; /* Slightly more rounded */
+    text-align: center;
+    background-color: #fdfdfd; /* Very light grey background */
+}
+
+.input-section h2 {
+     margin-top: 0;
+     margin-bottom: 20px; /* More space after title */
+     border-bottom: none; /* Remove border for titles inside sections */
+     text-align: center; /* Center title within section */
+}
+
+/* Style the action buttons */
+.action-button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 24px; /* Slightly larger padding */
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem; /* Use rem unit */
+    font-weight: 500; /* Medium weight */
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    margin-top: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.action-button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+}
+.action-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+    box-shadow: none;
+}
+
+/* Specific button styling */
+#submitEditsButton {
+     background-color: #28a745; /* Green for submit */
+     border-color: #28a745;
+     width: 100%; /* Full width */
+     margin-top: 25px; /* More space */
+     padding: 14px 20px; /* Larger submit */
+}
+#submitEditsButton:hover {
+     background-color: #218838;
+     border-color: #1e7e34;
+}
+
+
+/* URL input style */
+.url-input {
+    width: calc(100% - 22px); /* Full width minus padding/border */
+    max-width: 450px; /* Adjust width */
+    padding: 12px; /* More padding */
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-bottom: 15px; /* More space */
+    display: block; /* Make block for centering */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Separator */
+.separator {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0)); /* Faded line */
+    margin: 35px 0;
+}
+
+/* Feedback areas */
+.feedback-item {
+    font-size: 0.85rem; /* Use rem */
+    color: #666;
+    margin-top: 10px; /* More space */
+    min-height: 18px;
+}
+
+.feedback-area {
+    margin-top: 25px;
+    font-size: 1rem;
+    font-weight: 500; /* Slightly less bold */
+    padding: 12px 18px;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    min-height: 30px; /* Adjust height */
+    text-align: left;
+    word-wrap: break-word;
+    line-height: 1.5;
+    border: 1px solid #dcdcdc; /* Add border */
+}
+.feedback-area.success {
+    background-color: #d1e7dd; /* Updated green */
+    color: #0f5132;
+    border-color: #badbcc;
+}
+.feedback-area.error {
+    background-color: #f8d7da;
+    color: #842029;
+    border-color: #f5c2c7;
+}
+.feedback-area.info {
+    background-color: #cfe2ff; /* Updated blue */
+    color: #052c65;
+    border-color: #b6d4fe;
+}
+
+/* Download links within feedback area */
+.feedback-area a {
+     color: #0a58ca; /* Stronger blue for link */
+     text-decoration: underline;
+     font-weight: 600;
+     display: inline-block; /* Make inline block */
+     margin-top: 8px;
+     padding: 3px 0; /* Add small vertical padding */
+}
+.feedback-area a:hover {
+     color: #084099;
+     text-decoration: none; /* Remove underline on hover */
+}
+
+/* Progress Indicator */
+.progress-indicator {
+    margin-top: 20px;
+    font-size: 0.95rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px; /* More space */
+    min-height: 30px;
+}
+
+/* Simple CSS Spinner */
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 28px; /* Larger spinner */
+  height: 28px;
+  border-radius: 50%;
+  border-left-color: #007bff;
+  animation: spin 1s linear infinite; /* Smoother spin */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Voice Options Section */
+.options-section {
+    margin-top: 25px;
+    margin-bottom: 25px;
+    padding: 20px;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    background-color: #fdfdfd;
+}
+
+.options-section h2 { /* Use h2 consistent with other sections */
+    color: #444;
+    font-size: 1.1em; /* Adjusted size */
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: none;
+    text-align: center;
+}
+
+.voice-options {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px; /* More space */
+    margin-top: 10px;
+}
+
+.voice-options label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.voice-options input[type="radio"] {
+    margin-right: 8px; /* More space */
+    cursor: pointer;
+    accent-color: #007bff;
+    width: 16px; /* Slightly larger radio */
+    height: 16px;
+}
+
+/* --- Styles for Review Section --- */
+#reviewSection {
+    margin-top: 35px;
+    text-align: left;
+    border-top: 1px solid #ddd; /* Slightly darker border */
+    padding-top: 25px;
+}
+
+#reviewSection h2 {
+     text-align: center;
+     margin-bottom: 20px;
+     border-bottom: none; /* Remove double border */
+}
+
+#reviewSection p { /* General paragraph in review section */
+     font-size: 1rem; /* Standard size */
+     color: #333;
+     line-height: 1.6; /* More line spacing */
+     margin-bottom: 20px;
+     text-align: center; /* Center intro paragraph */
+}
+
+
+.review-chunk {
+    border: 1px solid #e5e5e5; /* Slightly darker */
+    border-radius: 6px;
+    padding: 18px; /* More padding */
+    margin-bottom: 20px;
+    background-color: #ffffff; /* White background for chunks */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04); /* Subtle shadow */
+}
+
+.review-chunk h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #17a2b8; /* Teal color for chunk title */
+    font-size: 1.1em;
+    font-weight: 600;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+.review-chunk hr { /* Separator between original and translated */
+    border: none;
+    border-top: 1px dashed #d0d0d0; /* Lighter dashed */
+    margin: 18px 0; /* More space */
+}
+
+/* Styling for original transcription block */
+.transcription-original {
+    margin-bottom: 15px;
+    padding: 12px;
+    background-color: #f8f9fa; /* Very light grey */
+    border-radius: 4px;
+    border: 1px solid #e9ecef; /* Lighter border */
+}
+
+.transcription-original strong {
+    display: block;
+    font-size: 0.9rem;
+    color: #555; /* Grey label */
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.transcription-original p { /* The actual transcription text */
+     font-size: 0.95rem;
+     color: #333;
+     margin: 5px 0 !important;
+     padding: 0 !important; /* Remove extra padding */
+     border-radius: 0 !important;
+     font-style: normal !important; /* Not italic */
+     background-color: transparent !important;
+     border: none !important; /* Remove border */
+     line-height: 1.5;
+}
+
+.transcription-original small { /* Status message */
+    font-size: 0.8rem;
+    color: #777;
+    display: block;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* Styling for the translated text part */
+.review-chunk label { /* Label for Translated Text */
+    display: block;
+    margin-bottom: 5px;
+    font-weight: normal;
+    font-size: 0.9rem;
+    color: #555;
+}
+.review-chunk label strong { /* Make "Translated Text" bold */
+     color: #333;
+     font-weight: 600; /* Bold */
+}
+
+.review-chunk label + small { /* Status message below the label */
+     display: block;
+     font-size: 0.8rem;
+     font-weight: normal;
+     color: #777;
+     margin-bottom: 8px; /* More space before textarea */
+     font-style: italic;
+}
+
+
+.review-chunk textarea { /* Editable translated text */
+    width: 100%; /* Use full width */
+    padding: 10px; /* More padding */
+    border: 1px solid #ced4da; /* Standard bootstrap-like border */
+    border-radius: 4px;
+    font-size: 1rem;
+    margin-bottom: 12px;
+    min-height: 80px; /* Adjust height */
+    box-sizing: border-box;
+    background-color: #fff;
+    line-height: 1.5;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.review-chunk textarea:focus {
+     border-color: #86b7fe;
+     outline: 0;
+     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+
+.review-chunk a { /* Download link */
+    display: inline-block;
+    font-size: 0.8rem;
+    color: #0d6efd; /* Bootstrap blue */
+    text-decoration: none;
+    margin-top: 8px;
+    padding: 6px 12px;
+    border: 1px solid #dee2e6; /* Lighter border */
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+}
+
+.review-chunk a:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+    color: #0a58ca;
+}

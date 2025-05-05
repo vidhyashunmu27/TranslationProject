@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Translation with Review</title> <!-- Updated Title -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="upload-container">
+        <h1>Video Translation with Review</h1>
+
+        <!-- Input Section (Stage 1 Trigger) -->
+        <div id="inputSection"> <!-- Added ID to hide/show -->
+            <!-- Option 1: File Upload -->
+            <div class="input-section">
+                <h2>1. Provide Video Source</h2>
+                <!-- More specific accept attribute -->
+                <input type="file" id="videoFile" accept="video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm,video/x-flv,video/mpeg" style="display: none;">
+                <button id="uploadButton" class="action-button">Choose Video File</button>
+                <div id="fileFeedback" class="feedback-item">No file selected.</div>
+            </div>
+
+            <hr class="separator">
+
+            <!-- Option 2: YouTube URL -->
+            <div class="input-section">
+                <h2>Or Enter YouTube URL</h2>
+                <input type="url" id="youtubeUrl" placeholder="e.g., https://www.youtube.com/watch?v=..." class="url-input">
+                <button id="processUrlButton" class="action-button">Process YouTube URL</button>
+            </div>
+
+            <hr class="separator">
+
+             <!-- Options Section -->
+             <div class="options-section" id="voiceOptionsContainer"> <!-- Added ID -->
+                  <h2>2. Select Voice Option</h2> <!-- Changed heading -->
+                  <div class="voice-options">
+                      <label for="voiceFemale">
+                          <input type="radio" id="voiceFemale" name="ttsVoice" value="female" checked> Female Voice
+                      </label>
+                      <label for="voiceMale">
+                          <input type="radio" id="voiceMale" name="ttsVoice" value="male"> Male Voice
+                      </label>
+                  </div>
+                  <div class="feedback-item" style="font-size: 12px; color: #888;">(Tamil voice selection depends on TTS engine availability)</div>
+             </div>
+        </div><!-- End Input Section -->
+
+
+        <!-- Shared Feedback Area -->
+        <div id="mainFeedbackArea" class="feedback-area" style="margin-top: 25px;">
+            Ready for input. Select options and provide video source.
+        </div>
+
+        <!-- Shared Progress Indicator -->
+        <div id="progressIndicator" class="progress-indicator" style="display: none;">
+            Processing... <span id="progressStep"></span>
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Review Section (Final Stage Trigger) - Initially Hidden -->
+        <div id="reviewSection" style="display: none; margin-top: 30px; text-align: left; border-top: 1px solid #ccc; padding-top: 20px;">
+             <!-- Heading updated -->
+            <h2>3. Review & Edit Translations</h2>
+            <p>Review the automatically translated text for each audio chunk below. The original transcription is shown for context. You can download the original audio chunk. Edit the <strong>translated text</strong> in the boxes as needed before submitting.</p>
+            <input type="hidden" id="currentJobId"> <!-- To store the job ID -->
+            <div id="reviewContent">
+                <!-- Content loaded by JS: Original text + Editable translated text -->
+            </div>
+            <!-- Button text updated -->
+            <button id="submitEditsButton" class="action-button" style="margin-top: 20px; width: 100%; background-color: #28a745; border-color: #28a745;">Submit Edits & Generate Final Video</button>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
